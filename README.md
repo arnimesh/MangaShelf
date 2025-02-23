@@ -23,4 +23,3 @@ MangaShelf is a modern Android application that helps users discover, track, and
 - **Navigation**: Navigation Component
 - **Asynchronous Programming**: Coroutines + Flow
 
-## Project Structure 
