@@ -2,10 +2,6 @@
 
 MangaShelf is a modern Android application that helps users discover, track, and organize their manga reading experience.
 
-## Download
-
-You can download the latest debug APK from:
-- [Direct Download Link](app/build/outputs/apk/debug/app-debug.apk)
 
 ## Features
 
