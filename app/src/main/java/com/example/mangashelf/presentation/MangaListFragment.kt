@@ -70,22 +70,30 @@ class MangaListFragment : Fragment() {
             viewModel.uiState.collectLatest { state ->
                 when (state) {
                     is UiState.Loading -> {
-                        binding.progressBar.isVisible = true
-                        binding.mangaRecyclerView.isVisible = false
-                        binding.errorView.isVisible = false
+                        // Show full screen loader for initial load
+                        binding.apply {
+                            progressBar.isVisible = true
+                            mangaRecyclerView.isVisible = false
+                            errorView.isVisible = false
+                            swipeRefresh.isRefreshing = false  // Don't show both loaders
+                        }
                     }
                     is UiState.Success -> {
-                        binding.progressBar.isVisible = false
-                        binding.mangaRecyclerView.isVisible = true
-                        binding.errorView.isVisible = false
-                        binding.swipeRefresh.isRefreshing = false
-                        adapter.submitList(state.data)
+                        binding.apply {
+                            progressBar.isVisible = false
+                            mangaRecyclerView.isVisible = true
+                            errorView.isVisible = false
+                            swipeRefresh.isRefreshing = false
+                            adapter.submitList(state.data)
+                        }
                     }
                     is UiState.Error -> {
-                        binding.progressBar.isVisible = false
-                        binding.mangaRecyclerView.isVisible = false
-                        binding.errorView.isVisible = true
-                        binding.swipeRefresh.isRefreshing = false
+                        binding.apply {
+                            progressBar.isVisible = false
+                            mangaRecyclerView.isVisible = false
+                            errorView.isVisible = true
+                            swipeRefresh.isRefreshing = false
+                        }
                     }
                 }
             }
