@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">MangaShelf</string>
     <string name="error_loading_manga">Error loading manga</string>
+    <string name="error_no_internet">No internet connection</string>
 </resources>

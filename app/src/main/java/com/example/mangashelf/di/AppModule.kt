@@ -97,8 +97,9 @@ object AppModule {
         api: MangaApiService,
         dao: MangaDao,
         networkUtils: NetworkUtils,
-        dataStoreManager: DataStoreManager
+        dataStoreManager: DataStoreManager,
+        @ApplicationContext context: Context
     ): MangaRepository {
-        return MangaRepositoryImpl(api, dao, networkUtils, dataStoreManager)
+        return MangaRepositoryImpl(api, dao, networkUtils, dataStoreManager, context)
     }
 } 
