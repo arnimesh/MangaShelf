@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mangaListFragment">
+
+    <fragment
+        android:id="@+id/mangaListFragment"
+        android:name="com.example.mangashelf.presentation.ui.list.MangaListFragment"
+        android:label="Manga List">
+        <action
+            android:id="@+id/action_list_to_detail"
+            app:destination="@id/mangaDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mangaDetailFragment"
+        android:name="com.example.mangashelf.presentation.ui.detail.MangaDetailFragment"
+        android:label="Manga Detail">
+        <argument
+            android:name="manga"
+            app:argType="com.example.mangashelf.domain.model.Manga" />
+    </fragment>
+</navigation> 

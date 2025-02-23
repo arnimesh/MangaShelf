@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <item android:id="@+id/menu_sort"
+        android:title="Sort"
+        android:icon="@drawable/ic_sort"
+        app:showAsAction="always">
+        
+        <menu>
+            <group android:id="@+id/group_year">
+                <item android:id="@+id/sort_year_asc"
+                    android:title="Year (Ascending)"
+                    android:icon="@drawable/ic_arrow_upward"/>
+                <item android:id="@+id/sort_year_desc"
+                    android:title="Year (Descending)"
+                    android:icon="@drawable/ic_arrow_downward"/>
+            </group>
+
+            <group android:id="@+id/group_score">
+                <item android:id="@+id/sort_score_asc"
+                    android:title="Score (Ascending)"
+                    android:icon="@drawable/ic_arrow_upward"/>
+                <item android:id="@+id/sort_score_desc"
+                    android:title="Score (Descending)"
+                    android:icon="@drawable/ic_arrow_downward"/>
+            </group>
+
+            <group android:id="@+id/group_popularity">
+                <item android:id="@+id/sort_popularity_asc"
+                    android:title="Popularity (Ascending)"
+                    android:icon="@drawable/ic_arrow_upward"/>
+                <item android:id="@+id/sort_popularity_desc"
+                    android:title="Popularity (Descending)"
+                    android:icon="@drawable/ic_arrow_downward"/>
+            </group>
+        </menu>
+    </item>
+</menu> 
