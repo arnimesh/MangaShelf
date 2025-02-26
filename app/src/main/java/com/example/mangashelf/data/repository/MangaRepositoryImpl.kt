@@ -34,44 +34,37 @@ class MangaRepositoryImpl @Inject constructor(
     }
 
     override fun getAllManga(): Flow<Result<List<Manga>>> = flow {
-        Logger.d("Repository: Starting getAllManga")
         emit(Result.Loading())
         
-        // Get initial database data
-        val initialData = dao.getAllManga().first()
-        Logger.d("Repository: Database returned ${initialData.size} items")
-        
-        // If database is empty or cache is stale, refresh from API
-        if (initialData.isEmpty() || shouldRefreshCache()) {
-            Logger.d("Repository: Database empty or cache stale, refreshing from API")
+        // Check if refresh needed first
+        if (shouldRefresh()) {
             try {
                 refreshManga()
             } catch (e: Exception) {
-                Logger.e("Repository: Refresh failed", e)
-                emit(Result.Error("Unable to refresh: ${e.localizedMessage}"))
+                emit(Result.Error("Unable to refresh: ${e.message}"))
+                // Even if refresh fails, continue to emit cached data
             }
         }
-        
-        // Emit database updates
-        emitAll(dao.getAllManga()
-            .map { entities -> 
-                Logger.d("Repository: Database returned ${entities.size} items")
-                Result.Success(entities.map { it.toManga() })
+
+        // Emit database content (either fresh or cached)
+        dao.getAllManga()
+            .map { entities -> entities.map { it.toManga() } }
+            .collect { mangas ->
+                emit(Result.Success(mangas))
             }
-        )
-    }.catch { e ->
-        Logger.e("Repository: Error in getAllManga", e)
-        emit(Result.Error("Error: ${e.localizedMessage}"))
-    }
+    }.flowOn(Dispatchers.IO)
 
     override fun getFavorites(): Flow<Result<List<Manga>>> = flow {
         emit(Result.Loading())
-        emitAll(dao.getFavorites()
-            .map { entities -> Result.Success(entities.map { it.toManga() }) }
-        )
+        
+        dao.getFavorites()
+            .map { entities -> entities.map { it.toManga() } }
+            .collect { mangas ->
+                emit(Result.Success(mangas))
+            }
     }.catch { e ->
         emit(Result.Error("Error: ${e.localizedMessage}"))
-    }
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun refreshManga() {
         if (!networkUtils.isNetworkAvailable()) {
@@ -83,10 +76,13 @@ class MangaRepositoryImpl @Inject constructor(
         try {
             val response = api.getMangaList()
             Logger.d("Repository: API response received, success=${response.isSuccessful}")
+            
             if (response.isSuccessful) {
                 response.body()?.let { dtos ->
                     Logger.d("Repository: Received ${dtos.size} items from API")
-                    dao.insertAll(dtos.map { it.toMangaEntity() })
+                    withContext(Dispatchers.IO) {
+                        dao.insertAll(dtos.map { it.toMangaEntity() })
+                    }
                     dataStoreManager.updateLastSyncTime(System.currentTimeMillis())
                 } ?: run {
                     showToast(R.string.error_loading_manga)
@@ -111,10 +107,10 @@ class MangaRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun shouldRefreshCache(): Boolean {
+    private suspend fun shouldRefresh(): Boolean = withContext(Dispatchers.IO) {
         val lastSync = dataStoreManager.lastSyncTime.first()
         val timeSinceLastSync = System.currentTimeMillis() - lastSync
-        return timeSinceLastSync > TimeUnit.HOURS.toMillis(CACHE_TIMEOUT_HOURS)
+        timeSinceLastSync > TimeUnit.HOURS.toMillis(CACHE_TIMEOUT_HOURS)
     }
 
     private suspend fun showToast(@StringRes messageResId: Int) {
