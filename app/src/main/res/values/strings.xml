@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MangaShelf</string>
-    <string name="error_loading_manga">Error loading manga</string>
+    <string name="error_loading_manga">Failed to load manga.\nPlease check your connection and try again.</string>
     <string name="error_no_internet">No internet connection</string>
+    <string name="retry">Retry</string>
 </resources>

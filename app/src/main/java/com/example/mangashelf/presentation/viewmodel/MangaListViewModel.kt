@@ -45,28 +45,44 @@ class MangaListViewModel @Inject constructor(
     fun loadMangas() {
         Logger.d("ViewModel: Starting loadMangas")
         viewModelScope.launch {
-            getMangaListUseCase().collect { result ->
-                Logger.d("ViewModel: Received result: $result")
-                when (result) {
-                    is Result.Loading -> {
-                        Logger.d("ViewModel: Loading state")
-                        _uiState.update { it.copy(isLoading = true, error = null) }
-                    }
-                    is Result.Success -> {
-                        allManga = result.data
-                        updateAvailableYears(result.data)
-                        updateUiState(result.data)
-                    }
-                    is Result.Error -> {
-                        Logger.e("ViewModel: Error state: ${result.message}")
-                        _uiState.update { 
-                            it.copy(
-                                isLoading = false,
-                                error = result.message
-                            )
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                getMangaListUseCase().collect { result ->
+                    Logger.d("ViewModel: Received result: $result")
+                    when (result) {
+                        is Result.Loading -> {
+                            Logger.d("ViewModel: Loading state")
+                            _uiState.update { it.copy(isLoading = true, error = null) }
+                        }
+                        is Result.Success -> {
+                            allManga = result.data
+                            updateAvailableYears(result.data)
+                            updateUiState(result.data)
+                        }
+                        is Result.Error -> {
+                            Logger.e("ViewModel: Error state: ${result.message}")
+                            _uiState.update { 
+                                it.copy(
+                                    isLoading = false,
+                                    error = result.message
+                                )
+                            }
                         }
                     }
                 }
+            } catch (e: Exception) {
+                val errorMessage = when {
+                    e.message?.contains("Connection reset") == true -> 
+                        "Connection failed. Please try again."
+                    e.message?.contains("No internet connection") == true -> 
+                        "No internet connection"
+                    else -> 
+                        "Failed to load manga"
+                }
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    error = errorMessage
+                ) }
             }
         }
     }
@@ -84,7 +100,6 @@ class MangaListViewModel @Inject constructor(
                             updateUiState(result.data)
                         }
                         is Result.Error -> {
-                            showToast(R.string.error_loading_manga)
                             _uiState.update { 
                                 it.copy(
                                     isLoading = false,
@@ -103,14 +118,17 @@ class MangaListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                if (e.message?.contains("No internet connection") == true) {
-                    showToast(R.string.error_no_internet)
-                } else {
-                    showToast(R.string.error_loading_manga)
+                val errorMessage = when {
+                    e.message?.contains("Connection reset") == true -> 
+                        "Connection failed. Please try again."
+                    e.message?.contains("No internet connection") == true ->
+                        "No internet connection"
+                    else -> 
+                        "Failed to load manga"
                 }
                 _uiState.update { it.copy(
                     isLoading = false,
-                    error = e.message
+                    error = errorMessage
                 ) }
             }
         }
@@ -199,8 +217,7 @@ class MangaListViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(
                 mangas = sortedMangas,
-                isLoading = false,
-                error = null
+                isLoading = false
             )
         }
     }

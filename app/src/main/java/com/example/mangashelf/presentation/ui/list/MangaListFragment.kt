@@ -159,14 +159,21 @@ class MangaListFragment : Fragment() {
                     // Show swipe refresh indicator only for refresh actions
                     swipeRefresh.isRefreshing = state.isLoading && mangaRecyclerView.adapter?.itemCount != 0
                     
-                    // Show/hide main content and FAB
+                    // Show/hide main content
                     mangaRecyclerView.isVisible = !state.isLoading || mangaRecyclerView.adapter?.itemCount != 0
+                    
+                    // Show/hide error container (this will control both error text and retry button)
+                    errorContainer.isVisible = state.error != null
+                    
+                    // Hide FAB when showing error or loading
                     if (state.isLoading || state.error != null) {
                         scrollFab.hide()
                     }
-                    
-                    // Show/hide error view
-                    errorView.isVisible = state.error != null
+
+                    // Setup retry button click listener
+                    retryButton.setOnClickListener {
+                        viewModel.refreshManga()
+                    }
 
                     if (!state.isLoading && state.error == null) {
                         mangaAdapter.submitList(state.mangas) {
