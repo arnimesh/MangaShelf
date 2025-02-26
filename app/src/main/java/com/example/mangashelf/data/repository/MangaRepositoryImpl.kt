@@ -69,7 +69,6 @@ class MangaRepositoryImpl @Inject constructor(
     override suspend fun refreshManga() {
         if (!networkUtils.isNetworkAvailable()) {
             Logger.d("Repository: No network available")
-            showToast(R.string.error_no_internet)
             throw Exception("No internet connection")
         }
 
@@ -84,17 +83,12 @@ class MangaRepositoryImpl @Inject constructor(
                         dao.insertAll(dtos.map { it.toMangaEntity() })
                     }
                     dataStoreManager.updateLastSyncTime(System.currentTimeMillis())
-                } ?: run {
-                    showToast(R.string.error_loading_manga)
-                    throw Exception("Empty response from server")
-                }
+                } ?: throw Exception("Empty response from server")
             } else {
-                showToast(R.string.error_loading_manga)
                 throw Exception("Server error: ${response.code()}")
             }
         } catch (e: Exception) {
             Logger.e("Repository: Error in refreshManga", e)
-            showToast(R.string.error_loading_manga)
             throw Exception("Failed to refresh: ${e.localizedMessage}")
         }
     }

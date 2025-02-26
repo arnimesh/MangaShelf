@@ -1,8 +1,11 @@
 package com.example.mangashelf.presentation.viewmodel
 
-import android.icu.util.Calendar
+import android.content.Context
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mangashelf.R
 import com.example.mangashelf.domain.model.Manga
 import com.example.mangashelf.domain.usecase.GetMangaListUseCase
 import com.example.mangashelf.domain.usecase.RefreshMangaUseCase
@@ -14,6 +17,7 @@ import com.example.mangashelf.util.DateUtils
 import com.example.mangashelf.util.Logger
 import com.example.mangashelf.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,10 +26,11 @@ import javax.inject.Inject
 class MangaListViewModel @Inject constructor(
     private val getMangaListUseCase: GetMangaListUseCase,
     private val refreshMangaUseCase: RefreshMangaUseCase,
-    private val updateMangaUseCase: UpdateMangaUseCase
+    private val updateMangaUseCase: UpdateMangaUseCase,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MangaListUiState())
+    private val _uiState = MutableStateFlow(MangaListUiState(isLoading = true))
     val uiState: StateFlow<MangaListUiState> = _uiState.asStateFlow()
 
     private val _availableYears = MutableStateFlow<Set<Int>>(emptySet())
@@ -45,7 +50,7 @@ class MangaListViewModel @Inject constructor(
                 when (result) {
                     is Result.Loading -> {
                         Logger.d("ViewModel: Loading state")
-                        _uiState.update { it.copy(isLoading = true) }
+                        _uiState.update { it.copy(isLoading = true, error = null) }
                     }
                     is Result.Success -> {
                         allManga = result.data
@@ -79,6 +84,7 @@ class MangaListViewModel @Inject constructor(
                             updateUiState(result.data)
                         }
                         is Result.Error -> {
+                            showToast(R.string.error_loading_manga)
                             _uiState.update { 
                                 it.copy(
                                     isLoading = false,
@@ -97,6 +103,11 @@ class MangaListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                if (e.message?.contains("No internet connection") == true) {
+                    showToast(R.string.error_no_internet)
+                } else {
+                    showToast(R.string.error_loading_manga)
+                }
                 _uiState.update { it.copy(
                     isLoading = false,
                     error = e.message
@@ -213,5 +224,9 @@ class MangaListViewModel @Inject constructor(
         } else {
             mangas.sortedWith(comparator.reversed())
         }
+    }
+
+    private fun showToast(@StringRes messageResId: Int) {
+        Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show()
     }
 } 
