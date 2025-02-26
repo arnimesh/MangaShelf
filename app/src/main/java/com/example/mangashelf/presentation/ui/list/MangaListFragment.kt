@@ -153,31 +153,21 @@ class MangaListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
                 binding.apply {
-                    // Show center progress bar only for initial loading
                     progressBar.isVisible = state.isLoading && mangaRecyclerView.adapter?.itemCount == 0
-                    
-                    // Show swipe refresh indicator only for refresh actions
                     swipeRefresh.isRefreshing = state.isLoading && mangaRecyclerView.adapter?.itemCount != 0
-                    
-                    // Show/hide main content
                     mangaRecyclerView.isVisible = !state.isLoading || mangaRecyclerView.adapter?.itemCount != 0
-                    
-                    // Show/hide error container (this will control both error text and retry button)
                     errorContainer.isVisible = state.error != null
                     
-                    // Hide FAB when showing error or loading
                     if (state.isLoading || state.error != null) {
                         scrollFab.hide()
                     }
 
-                    // Setup retry button click listener
                     retryButton.setOnClickListener {
                         viewModel.refreshManga()
                     }
 
                     if (!state.isLoading && state.error == null) {
                         mangaAdapter.submitList(state.mangas) {
-                            // Scroll to top after the list update is complete
                             mangaRecyclerView.scrollToPosition(0)
                         }
                     }
@@ -189,11 +179,11 @@ class MangaListFragment : Fragment() {
     private fun setupScrollFab() {
         binding.scrollFab.setOnClickListener {
             if (isScrollingUp) {
-                binding.mangaRecyclerView.smoothScrollToPosition(0)
+                binding.mangaRecyclerView.scrollToPosition(0)
             } else {
                 mangaAdapter.itemCount.let { count ->
                     if (count > 0) {
-                        binding.mangaRecyclerView.smoothScrollToPosition(count - 1)
+                        binding.mangaRecyclerView.scrollToPosition(count - 1)
                     }
                 }
             }
@@ -201,11 +191,11 @@ class MangaListFragment : Fragment() {
 
         binding.mangaRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy > 0) {  // Scrolling down
+                if (dy > 0) {
                     binding.scrollFab.hide()
                     isScrollingUp = false
                     updateFabIcon()
-                } else if (dy < 0) {  // Scrolling up
+                } else if (dy < 0) {
                     if (!viewModel.uiState.value.isLoading && viewModel.uiState.value.error == null) {
                         binding.scrollFab.show()
                     }
@@ -223,7 +213,6 @@ class MangaListFragment : Fragment() {
             }
         })
 
-        // Set initial icon
         updateFabIcon()
     }
 

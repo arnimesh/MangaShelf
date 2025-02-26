@@ -57,23 +57,14 @@ class MangaListAdapter(
         fun bind(manga: Manga) {
             binding.apply {
                 titleTextView.text = manga.title
-                
-                // Year chip - simplified conversion
                 yearChip.text = DateUtils.timestampToYear(manga.publishedChapterDate).toString()
-                
-                // Score chip
                 scoreChip.text = String.format("%.1f", manga.score)
-                
-                // Popularity chip
                 popularityChip.text = "#${manga.popularity}"
-                
-                // Favorite button
                 favoriteButton.setIconResource(
                     if (manga.isFavorite) R.drawable.ic_favorite 
                     else R.drawable.ic_favorite_border
                 )
                 
-                // Load cover image
                 coverImageView.load(manga.image) {
                     crossfade(true)
                     placeholder(R.drawable.placeholder_manga)

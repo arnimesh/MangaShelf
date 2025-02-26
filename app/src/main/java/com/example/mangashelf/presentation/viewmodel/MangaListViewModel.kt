@@ -1,7 +1,6 @@
 package com.example.mangashelf.presentation.viewmodel
 
 import android.content.Context
-import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -241,9 +240,5 @@ class MangaListViewModel @Inject constructor(
         } else {
             mangas.sortedWith(comparator.reversed())
         }
-    }
-
-    private fun showToast(@StringRes messageResId: Int) {
-        Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show()
     }
 } 

@@ -1,9 +1,6 @@
 package com.example.mangashelf.data.repository
 
 import android.content.Context
-import android.widget.Toast
-import androidx.annotation.StringRes
-import com.example.mangashelf.R
 import com.example.mangashelf.data.local.DataStoreManager
 import com.example.mangashelf.data.local.MangaDao
 import com.example.mangashelf.data.mapper.toManga
@@ -105,11 +102,5 @@ class MangaRepositoryImpl @Inject constructor(
         val lastSync = dataStoreManager.lastSyncTime.first()
         val timeSinceLastSync = System.currentTimeMillis() - lastSync
         timeSinceLastSync > TimeUnit.HOURS.toMillis(CACHE_TIMEOUT_HOURS)
-    }
-
-    private suspend fun showToast(@StringRes messageResId: Int) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show()
-        }
     }
 } 
