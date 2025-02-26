@@ -152,19 +152,27 @@ class MangaListFragment : Fragment() {
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
-                // Show center progress bar only for initial loading
-                binding.progressBar.isVisible = state.isLoading && binding.mangaRecyclerView.adapter?.itemCount == 0
-                
-                // Show swipe refresh indicator only for refresh actions
-                binding.swipeRefresh.isRefreshing = state.isLoading && binding.mangaRecyclerView.adapter?.itemCount != 0
-                
-                binding.mangaRecyclerView.isVisible = !state.isLoading || binding.mangaRecyclerView.adapter?.itemCount != 0
-                binding.errorView.isVisible = state.error != null
+                binding.apply {
+                    // Show center progress bar only for initial loading
+                    progressBar.isVisible = state.isLoading && mangaRecyclerView.adapter?.itemCount == 0
+                    
+                    // Show swipe refresh indicator only for refresh actions
+                    swipeRefresh.isRefreshing = state.isLoading && mangaRecyclerView.adapter?.itemCount != 0
+                    
+                    // Show/hide main content and FAB
+                    mangaRecyclerView.isVisible = !state.isLoading || mangaRecyclerView.adapter?.itemCount != 0
+                    if (state.isLoading || state.error != null) {
+                        scrollFab.hide()
+                    }
+                    
+                    // Show/hide error view
+                    errorView.isVisible = state.error != null
 
-                if (!state.isLoading && state.error == null) {
-                    mangaAdapter.submitList(state.mangas) {
-                        // Scroll to top after the list update is complete
-                        binding.mangaRecyclerView.scrollToPosition(0)
+                    if (!state.isLoading && state.error == null) {
+                        mangaAdapter.submitList(state.mangas) {
+                            // Scroll to top after the list update is complete
+                            mangaRecyclerView.scrollToPosition(0)
+                        }
                     }
                 }
             }
@@ -172,14 +180,10 @@ class MangaListFragment : Fragment() {
     }
 
     private fun setupScrollFab() {
-        binding.scrollFab.show()
-        
         binding.scrollFab.setOnClickListener {
             if (isScrollingUp) {
-                // Scroll to top
                 binding.mangaRecyclerView.smoothScrollToPosition(0)
             } else {
-                // Scroll to bottom
                 mangaAdapter.itemCount.let { count ->
                     if (count > 0) {
                         binding.mangaRecyclerView.smoothScrollToPosition(count - 1)
@@ -188,7 +192,6 @@ class MangaListFragment : Fragment() {
             }
         }
 
-        // Hide FAB when scrolling and update icon based on scroll direction
         binding.mangaRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {  // Scrolling down
@@ -196,7 +199,9 @@ class MangaListFragment : Fragment() {
                     isScrollingUp = false
                     updateFabIcon()
                 } else if (dy < 0) {  // Scrolling up
-                    binding.scrollFab.hide()
+                    if (!viewModel.uiState.value.isLoading && viewModel.uiState.value.error == null) {
+                        binding.scrollFab.show()
+                    }
                     isScrollingUp = true
                     updateFabIcon()
                 }
@@ -204,12 +209,14 @@ class MangaListFragment : Fragment() {
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    binding.scrollFab.show()
+                    if (!viewModel.uiState.value.isLoading && viewModel.uiState.value.error == null) {
+                        binding.scrollFab.show()
+                    }
                 }
             }
         })
 
-        // Set initial icon (will be down arrow)
+        // Set initial icon
         updateFabIcon()
     }
 
