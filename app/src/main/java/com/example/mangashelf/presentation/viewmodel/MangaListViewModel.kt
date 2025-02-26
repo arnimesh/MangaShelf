@@ -10,6 +10,7 @@ import com.example.mangashelf.domain.usecase.UpdateMangaUseCase
 import com.example.mangashelf.presentation.model.MangaListUiState
 import com.example.mangashelf.presentation.model.SortOrder
 import com.example.mangashelf.presentation.model.SortType
+import com.example.mangashelf.util.DateUtils
 import com.example.mangashelf.util.Logger
 import com.example.mangashelf.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -150,9 +151,7 @@ class MangaListViewModel @Inject constructor(
     private fun sortMangas(mangas: List<Manga>): List<Manga> {
         val comparator = when (_uiState.value.sortType) {
             SortType.YEAR -> compareBy<Manga> { 
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = it.publishedChapterDate * 1000
-                calendar.get(Calendar.YEAR)
+                DateUtils.timestampToYear(it.publishedChapterDate)
             }
             SortType.SCORE -> compareByDescending<Manga> { it.score }
             SortType.POPULARITY -> compareByDescending<Manga> { it.popularity }
@@ -167,9 +166,7 @@ class MangaListViewModel @Inject constructor(
 
     private fun getYearsWithManga(mangas: List<Manga>): Set<Int> {
         return mangas.mapNotNull { manga ->
-            val calendar = Calendar.getInstance()
-            calendar.timeInMillis = manga.publishedChapterDate * 1000
-            calendar.get(Calendar.YEAR)
+            DateUtils.timestampToYear(manga.publishedChapterDate)
         }.toSortedSet()
     }
 
@@ -177,9 +174,7 @@ class MangaListViewModel @Inject constructor(
         if (selectedYear == null) return mangas
         
         return mangas.filter { manga ->
-            val calendar = Calendar.getInstance()
-            calendar.timeInMillis = manga.publishedChapterDate * 1000
-            calendar.get(Calendar.YEAR) == selectedYear
+            DateUtils.timestampToYear(manga.publishedChapterDate) == selectedYear
         }
     }
 
@@ -207,9 +202,7 @@ class MangaListViewModel @Inject constructor(
     ): List<Manga> {
         val comparator = when (sortType) {
             SortType.YEAR -> compareBy<Manga> { 
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = it.publishedChapterDate * 1000
-                calendar.get(Calendar.YEAR)
+                DateUtils.timestampToYear(it.publishedChapterDate)
             }
             SortType.SCORE -> compareByDescending<Manga> { it.score }
             SortType.POPULARITY -> compareByDescending<Manga> { it.popularity }

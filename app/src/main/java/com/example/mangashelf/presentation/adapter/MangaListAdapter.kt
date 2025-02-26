@@ -9,6 +9,7 @@ import coil.load
 import com.example.mangashelf.R
 import com.example.mangashelf.databinding.ItemMangaBinding
 import com.example.mangashelf.domain.model.Manga
+import com.example.mangashelf.util.DateUtils
 import java.util.*
 
 class MangaListAdapter(
@@ -57,10 +58,8 @@ class MangaListAdapter(
             binding.apply {
                 titleTextView.text = manga.title
                 
-                // Year chip
-                yearChip.text = Calendar.getInstance().apply {
-                    timeInMillis = manga.publishedChapterDate * 1000
-                }.get(Calendar.YEAR).toString()
+                // Year chip - simplified conversion
+                yearChip.text = DateUtils.timestampToYear(manga.publishedChapterDate).toString()
                 
                 // Score chip
                 scoreChip.text = String.format("%.1f", manga.score)
