@@ -23,7 +23,6 @@ class MangaRepositoryImpl @Inject constructor(
     private val dao: MangaDao,
     private val networkUtils: NetworkUtils,
     private val dataStoreManager: DataStoreManager,
-    @ApplicationContext private val context: Context
 ) : MangaRepository {
 
     companion object {
